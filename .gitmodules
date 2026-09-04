@@ -1,3 +1,4 @@
 [submodule "Iris"]
 	path = Iris
 	url = https://github.com/mkirsche/Iris.git
+	ignore = dirty

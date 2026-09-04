@@ -14,3 +14,10 @@ src/FixStrands.java
 data/
 output/
 out.log
+
+# downloaded demo dataset + generated test harness output (large, not source)
+test_data/demo_test/
+test_data/work/
+.vscode/
+Iris/
+*.jar
