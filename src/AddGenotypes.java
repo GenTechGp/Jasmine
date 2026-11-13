@@ -3,12 +3,14 @@
  */
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.zip.GZIPInputStream;
 
 public class AddGenotypes {
 	
@@ -351,7 +353,12 @@ public class AddGenotypes {
 			variantFormats = new ArrayList<VariantFormatField>();
 			idToVariantIndex = new HashMap<String, Integer>();
 			header = new VcfHeader();
-			Scanner input = new Scanner(new FileInputStream(new File(fileName)));
+			InputStream rawStream = new FileInputStream(new File(fileName));
+			if(fileName.endsWith(".gz"))
+			{
+				rawStream = new GZIPInputStream(rawStream);
+			}
+			Scanner input = new Scanner(rawStream);
 			boolean extractedSampleNames = false;
 			while(input.hasNext())
 			{

@@ -6,6 +6,7 @@
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.zip.GZIPInputStream;
 
 public class VariantOutput {
 	
@@ -47,7 +49,12 @@ public class VariantOutput {
 		for(String filename : filenames)
 		{
 			HashSet<String> ids = new HashSet<String>();
-			Scanner input = new Scanner(new FileInputStream(new File(filename)));
+			InputStream rawStream = new FileInputStream(new File(filename));
+			if(filename.endsWith(".gz"))
+			{
+				rawStream = new GZIPInputStream(rawStream);
+			}
+			Scanner input = new Scanner(rawStream);
 			
 			// Iterate over the variants in that file
 			while(input.hasNext())
