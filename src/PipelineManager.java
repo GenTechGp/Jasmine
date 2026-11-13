@@ -89,22 +89,25 @@ static String runIris(String fileList) throws Exception
 	String[] optionalArgs = Settings.IRIS_ARGS.split(",");
 	
 	HashSet<String> basenames = new HashSet<String>();
-	
+
+	Settings.log("Starting Iris preprocessing for " + vcfFiles.size() + " samples");
+	long irisTotalStart = System.currentTimeMillis();
+
 	// Refine one VCF file at a time
 	for(int i = 0; i<vcfFiles.size(); i++)
 	{
 		String vcfFile = vcfFiles.get(i);
-		
+
 		String basename = StringUtils.fileBaseName(vcfFile);
 		while(basenames.contains(basename))
 		{
 			basename = i + "_" + basename;
 		}
-		
+
 		String newVcfFile = Settings.OUT_DIR + "/" + StringUtils.addDescriptor(basename, "irisRefined");
 		String bamFile = bamFiles.get(i);
 		newVcfFiles.add(newVcfFile);
-		
+
 		// Generate the required Iris arguments based on the filenames
 		String[] requiredArgs = new String[]
 		{
@@ -113,7 +116,7 @@ static String runIris(String fileList) throws Exception
 			"reads_in=" + bamFile,
 			"vcf_out=" + newVcfFile
 		};
-		
+
 		// Concatenate the required arguments and the optional ones
 		String[] allArgs = new String[optionalArgs.length + requiredArgs.length];
 		for(int j = 0; j<requiredArgs.length; j++)
@@ -124,13 +127,20 @@ static String runIris(String fileList) throws Exception
 		{
 			allArgs[j + requiredArgs.length] = optionalArgs[j];
 		}
-		
+
 		// Actually run Iris
+		Settings.log("Starting Iris for sample " + (i + 1) + "/" + vcfFiles.size() + ": " + basename);
+		long irisSampleStart = System.currentTimeMillis();
 		Iris.runIris(allArgs);
-		
+		Settings.log("Finished Iris for sample " + (i + 1) + "/" + vcfFiles.size() + ": " + basename
+				+ " (" + Settings.secondsSince(irisSampleStart) + "s)");
+
 		basenames.add(basename);
 	}
-	
+
+	Settings.log("Finished Iris preprocessing for all " + vcfFiles.size() + " samples ("
+			+ Settings.secondsSince(irisTotalStart) + "s)");
+
 	return buildUpdatedFileList(fileList, "irisRefined", newVcfFiles);
 }
 

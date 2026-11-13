@@ -68,24 +68,38 @@ static String preprocess(String currentInputFile) throws Exception
 static void runJasmine(String currentInputFile) throws Exception
 {
 	// Get the variants and bin them into individual graphs
+	Settings.log("Reading input files");
+	long readStart = System.currentTimeMillis();
 	TreeMap<String, ArrayList<Variant>> allVariants = VariantInput.readAllFiles(currentInputFile);
-		
+	int totalVariants = 0;
+	for(ArrayList<Variant> graphVariants : allVariants.values())
+	{
+		totalVariants += graphVariants.size();
+	}
+	Settings.log("Finished reading input files - " + totalVariants + " variants across " + allVariants.size()
+			+ " graphs (" + Settings.secondsSince(readStart) + "s)");
+
 	// Initialize data structure for outputting merged variants
 	VariantOutput output = new VariantOutput();
-		
+
 	// Get the number of samples to know the length of the SUPP_VEC field
 	int sampleCount = VariantInput.countFiles(currentInputFile);
-		
+
 	// Merge each graph in parallel
+	Settings.log("Starting merging");
+	long mergeStart = System.currentTimeMillis();
 	ParallelMerger pm = new ParallelMerger(allVariants, output, sampleCount);
 	pm.run();
-		
+	Settings.log("Finished merging all graphs (" + Settings.secondsSince(mergeStart) + "s)");
+
 	System.out.println("Merging complete - outputting results");
-		
+
 	// Print the merged variants to a file if they have enough support
+	long writeStart = System.currentTimeMillis();
 	output.writeMergedVariants(currentInputFile, Settings.OUT_FILE);
-		
-	System.out.println("Number of sets with multiple variants: " + pm.totalMerged.get()); 
+	Settings.log("Finished writing output (" + Settings.secondsSince(writeStart) + "s)");
+
+	System.out.println("Number of sets with multiple variants: " + pm.totalMerged.get());
 }
 static void postprocess(String currentInputFile) throws Exception
 {

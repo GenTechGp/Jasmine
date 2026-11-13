@@ -69,9 +69,13 @@ public class Settings {
 	static int[] PER_SAMPLE_DISTS;
 	
 	static boolean REQUIRE_MUTUAL_DISTANCE = true;
-	
+
 	static double OVERLAP_REQUIRED = 0.0;
-	
+
+	// When true, print progress/timing messages for each processing phase and graph
+	static boolean LOG_TIMING = false;
+	static final long START_TIME = System.currentTimeMillis();
+
 	/*
 	 * Print the usage menu
 	 */
@@ -130,6 +134,7 @@ public class Settings {
 		System.out.println("  --non_mutual_distance               - no longer require a pair of points to be within both of their distance thresholds");
 		System.out.println("  --default_zero_genotype             - marks genotype as 0|0 instead of ./. for any samples in which a merged variant is absent");
 		System.out.println("  --nonlinear_dist                    - disable distance threshold depending on variant length and use max_dist instead");
+		System.out.println("  --log_timing                        - print progress and timing information for each processing phase and graph");
 
 
 		System.out.println();
@@ -142,7 +147,28 @@ public class Settings {
 		System.out.println();
 		
 	}
-	
+
+	/*
+	 * Print a progress/timing message, prefixed with elapsed time since program start.
+	 * No-op unless --log_timing was passed.
+	 */
+	static void log(String message)
+	{
+		if(LOG_TIMING)
+		{
+			double elapsedSeconds = (System.currentTimeMillis() - START_TIME) / 1000.0;
+			System.out.printf("[%8.3fs] %s%n", elapsedSeconds, message);
+		}
+	}
+
+	/*
+	 * Seconds elapsed since a System.currentTimeMillis() timestamp, for reporting phase durations
+	 */
+	static double secondsSince(long startMillis)
+	{
+		return (System.currentTimeMillis() - startMillis) / 1000.0;
+	}
+
 	/*
 	 * Method for parsing long integers allowing for abbreviations like 10k, 5m, etc.
 	 */
@@ -292,6 +318,10 @@ public class Settings {
 				else if(args[i].endsWith("nonlinear_dist"))
 				{
 					USE_LINEAR_THRESHOLD = false;
+				}
+				else if(args[i].endsWith("log_timing"))
+				{
+					LOG_TIMING = true;
 				}
 				continue;
 			}

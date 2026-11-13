@@ -85,8 +85,11 @@ public class ParallelMerger {
 				System.out.println("Merging graph ID: " + graphID);
 				ArrayList<Variant> variantList = allVariants.get(graphID);
 				Collections.sort(variantList);
+				long graphStart = System.currentTimeMillis();
 				VariantMerger vm = new VariantMerger(variantList);
 				vm.runMerging();
+				Settings.log("Finished graph " + graphID + " (" + variantList.size() + " variants, "
+						+ Settings.secondsSince(graphStart) + "s)");
 				ArrayList<Variant>[] res = vm.getGroups();
 				output.addGraph(graphID, res, sampleCount);
 				int merges = 0;
